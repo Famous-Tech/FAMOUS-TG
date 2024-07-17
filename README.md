@@ -22,7 +22,9 @@ Famous TG🔰✅ bot telegram   Premier bot telegram HAÏTIEN🇭🇹✅
 5.  et Ajoutez les variables d'environnement sur Heroku
    
    TELEGRAM_BOT_TOKEN=votre_token_de_bot_telegram
+   
    OPENAI_API_KEY=votre_cle_api_openai
+   
    PREFIX=.
    
 
