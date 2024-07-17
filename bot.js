@@ -6,33 +6,38 @@ const ytdl = require('ytdl-core');
 const yts = require('yt-search');
 const FormData = require('form-data');
 const morseCodeMap = require('./morseCodeMap');
+const sharp = require('sharp');
 
 const bot = new TelegramBot(config.telegramBotToken, { polling: true });
 const openaiClient = new openai.OpenAIApi(new openai.Configuration({ apiKey: config.apiKeyOpenAI }));
 
 const commands = {
-  '.start': 'Démarre le bot',
-  '.help': 'Affiche la liste des commandes',
-  '.gpt': 'Utilise l\'API GPT pour générer du texte',
-  '.list': 'Affiche une liste des utilisateurs du groupe',
-  '.alive': 'Vérifie si le bot est en ligne',
-  '.ping': 'Vérifie la latence du bot',
-  '.repo': 'Fournit un lien vers le dépôt GitHub du bot',
-  '.uptime': 'Affiche le temps écoulé depuis le démarrage du bot',
-  '.menu': 'Affiche la liste des commandes disponibles',
-  '.img': 'Recherche une image en utilisant Pixabay',
-  '.song': 'Envoie l\'audio de la musique demandée',
-  '.url': 'Génère un URL à partir de la vidéo, de la photo ou de l\'audio',
-  '.morse': 'Traduit un texte en code Morse ou vice versa',
-  '.dev': 'Affiche les informations sur le développeur',
-  '.antilink': 'Gère les liens non autorisés dans le groupe',
-  '.warn': 'Avertit un utilisateur',
-  '.kick': 'Expulse un utilisateur du groupe'
+  [config.prefix + 'start']: 'Démarre le bot',
+  [config.prefix + 'help']: 'Affiche la liste des commandes',
+  [config.prefix + 'gpt']: 'Utilise l\'API GPT pour générer du texte',
+  [config.prefix + 'list']: 'Affiche une liste des utilisateurs du groupe',
+  [config.prefix + 'alive']: 'Vérifie si le bot est en ligne',
+  [config.prefix + 'ping']: 'Vérifie la latence du bot',
+  [config.prefix + 'repo']: 'Fournit un lien vers le dépôt GitHub du bot',
+  [config.prefix + 'uptime']: 'Affiche le temps écoulé depuis le démarrage du bot',
+  [config.prefix + 'menu']: 'Affiche la liste des commandes disponibles',
+  [config.prefix + 'img']: 'Recherche une image en utilisant Pixabay',
+  [config.prefix + 'song']: 'Envoie l\'audio de la musique demandée',
+  [config.prefix + 'url']: 'Génère un URL à partir de la vidéo, de la photo ou de l\'audio',
+  [config.prefix + 'morse']: 'Traduit un texte en code Morse ou vice versa',
+  [config.prefix + 'dev']: 'Affiche les informations sur le développeur',
+  [config.prefix + 'antilink']: 'Gère les liens non autorisés dans le groupe',
+  [config.prefix + 'warn']: 'Avertit un utilisateur',
+  [config.prefix + 'kick']: 'Expulse un utilisateur du groupe',
+  [config.prefix + 'calc']: 'Effectue un calcul mathématique',
+  [config.prefix + 'tagall']: 'Tag tous les membres du groupe',
+  [config.prefix + 'convert']: 'Convertit une image en sticker',
+  [config.prefix + 'admin']: 'Affiche la liste des administrateurs du groupe'
 };
 
 let startTime = Date.now();
 
-bot.onText(/\.(start|help|gpt|list|alive|ping|repo|uptime|menu|img|song|url|morse|dev|antilink|warn|kick)/, async (msg, match) => {
+bot.onText(new RegExp(`\\${config.prefix}(start|help|gpt|list|alive|ping|repo|uptime|menu|img|song|url|morse|dev|antilink|warn|kick|calc|tagall|convert|admin)`), async (msg, match) => {
   const chatId = msg.chat.id;
   const command = match[1];
 
@@ -187,6 +192,56 @@ bot.onText(/\.(start|help|gpt|list|alive|ping|repo|uptime|menu|img|song|url|mors
       }
       bot.kickChatMember(chatId, kickUserId);
       bot.sendMessage(chatId, `Utilisateur expulsé: ${kickUserId}`);
+      break;
+    case 'calc':
+      const expression = msg.text.split(' ').slice(1).join(' ');
+      if (!expression) {
+        bot.sendMessage(chatId, 'Veuillez entrer une expression mathématique.');
+        return;
+      }
+      try {
+        const result = eval(expression);
+        bot.sendMessage(chatId, `Résultat: ${result}`);
+      } catch (error) {
+        bot.sendMessage(chatId, 'Expression invalide. Veuillez entrer une expression mathématique valide.');
+      }
+      break;
+    case 'tagall':
+      const chatType = msg.chat.type;
+      if (chatType !== 'group' && chatType !== 'supergroup') {
+        bot.sendMessage(chatId, 'Cette commande ne peut être utilisée que dans un groupe.');
+        return;
+      }
+      try {
+        const members = await bot.getChatAdministrators(chatId);
+        const memberNames = members.map(member => `@${member.user.username || member.user.first_name}`).join(' ');
+        bot.sendMessage(chatId, `Tout le monde: ${memberNames}`);
+      } catch (error) {
+        bot.sendMessage(chatId, 'Une erreur est survenue lors de la récupération des membres du groupe.');
+      }
+      break;
+    case 'convert':
+      if (!msg.photo) {
+        bot.sendMessage(chatId, 'Veuillez envoyer une photo à convertir en sticker.');
+        return;
+      }
+      const photoFileId = msg.photo[msg.photo.length - 1].file_id;
+      try {
+        const fileLink = await bot.getFileLink(photoFileId);
+        const response = await axios.get(fileLink, { responseType: 'arraybuffer' });
+        const imageBuffer = Buffer.from(response.data, 'binary');
+        const stickerBuffer = await sharp(imageBuffer)
+          .resize(512, 512, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+          .toBuffer();
+        bot.sendSticker(chatId, stickerBuffer);
+      } catch (error) {
+        bot.sendMessage(chatId, 'Une erreur est survenue lors de la conversion de l\'image en sticker.');
+      }
+      break;
+    case 'admin':
+      const admins = await bot.getChatAdministrators(chatId);
+      const adminList = admins.map(admin => `@${admin.user.username || admin.user.first_name}`).join('\n');
+      bot.sendMessage(chatId, `Liste des administrateurs:\n${adminList}`);
       break;
   }
 });
