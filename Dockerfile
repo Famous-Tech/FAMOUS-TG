@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Exposez le port sur lequel l'application va tourner
-EXPOSE 3000
+EXPOSE 8000
 
 # Commande pour démarrer l'application
 CMD ["node", "bot.js"]
