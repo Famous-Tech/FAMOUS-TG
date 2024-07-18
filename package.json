@@ -1,14 +1,18 @@
 {
   "name": "FAMOUS-TG",
   "version": "1.0.0",
-  "description": "Un bot Telegram avec diverses fonctionnalités développer par FAMOUS-TECH",
+  "description": "Un bot Telegram avec diverses fonctionnalités développé par FAMOUS-TECH",
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js"
   },
   "dependencies": {
-    "axios": "^0.21.1",
-    "node-telegram-bot-api": "^0.54.0",
-    "sharp": "^0.28.3"
+    "axios": "^1.7.2",
+    "form-data": "^4.0.0",
+    "node-telegram-bot-api": "^0.66.0",
+    "openai": "^4.52.7",
+    "sharp": "^0.33.4",
+    "yt-search": "^2.11.1",
+    "ytdl-core": "^4.11.5"
   }
 }
