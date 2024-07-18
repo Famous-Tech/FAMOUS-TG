@@ -1,7 +1,7 @@
 const TelegramBot = require('node-telegram-bot-api');
 const axios = require('axios');
 const config = require('./config');
-const openai = require('openai');
+const OpenAI = require('openai');
 const ytdl = require('ytdl-core');
 const yts = require('yt-search');
 const FormData = require('form-data');
@@ -9,7 +9,11 @@ const morseCodeMap = require('./morseCodeMap');
 const sharp = require('sharp');
 
 const bot = new TelegramBot(config.telegramBotToken, { polling: true });
-const openaiClient = new openai.OpenAIApi(new openai.Configuration({ apiKey: config.apiKeyOpenAI }));
+
+// Créer un nouveau client OpenAI avec votre clé API
+const openaiClient = new OpenAI({
+  apiKey: config.apiKeyOpenAI,
+});
 
 const commands = {
   [config.prefix + 'start']: 'Démarre le bot',
@@ -43,21 +47,21 @@ bot.onText(new RegExp(`\\${config.prefix}(start|help|gpt|list|alive|ping|repo|up
 
   switch (command) {
     case 'start':
-      bot.sendMessage(chatId, 'Bienvenue sur le bot Telegram!');
+      bot.sendMessage(chatId, 'Bienvenue sur FAMOUS TG que puis je faire pour vous. Tapez /menu pour voir la liste des commandes.');
       break;
     case 'help':
       const helpMessage = Object.entries(commands).map(([cmd, desc]) => `${cmd}: ${desc}`).join('\n');
       bot.sendMessage(chatId, helpMessage);
       break;
     case 'gpt':
-      bot.sendMessage(chatId, 'Veuillez entrer votre question pour GPT:');
+      bot.sendMessage(chatId, 'Veuillez entrer votre question pour ChatGPT:');
       bot.once('message', async (msg) => {
-        const response = await openaiClient.createCompletion({
+        const response = await openaiClient.completions.create({
           model: 'text-davinci-002',
           prompt: msg.text,
           max_tokens: 150,
         });
-        bot.sendMessage(chatId, response.data.choices[0].text);
+        bot.sendMessage(chatId, response.choices[0].text);
       });
       break;
     case 'list':
@@ -67,14 +71,14 @@ bot.onText(new RegExp(`\\${config.prefix}(start|help|gpt|list|alive|ping|repo|up
       });
       break;
     case 'alive':
-      bot.sendMessage(chatId, 'Je suis en ligne et prêt à aider!');
+      bot.sendMessage(chatId, 'Famous TG en ligne et prêt à vous servir ℹ');
       break;
     case 'ping':
       const pingTime = Date.now() - msg.date * 1000;
       bot.sendMessage(chatId, `Pong! Latence: ${pingTime} ms`);
       break;
     case 'repo':
-      bot.sendMessage(chatId, `Voici le lien vers le dépôt GitHub du bot: ${config.gitRepoUrl}`);
+      bot.sendMessage(chatId, `Voici le lien vers le dépôt GitHub de FAMOUS-TG V2: ${config.gitRepoUrl}`);
       break;
     case 'uptime':
       const uptime = Date.now() - startTime;
@@ -113,14 +117,14 @@ bot.onText(new RegExp(`\\${config.prefix}(start|help|gpt|list|alive|ping|repo|up
       try {
         const searchResults = await yts(songQuery);
         if (!searchResults.videos.length) {
-          bot.sendMessage(chatId, 'Aucune chanson trouvée pour cette recherche.');
+          bot.sendMessage(chatId, 'Aucune chanson trouvée pour cette recherche.🚫');
           return;
         }
         const video = searchResults.videos[0];
         const audioStream = ytdl(video.url, { filter: 'audioonly' });
         bot.sendAudio(chatId, audioStream, {}, { filename: `${video.title}.mp3` });
       } catch (error) {
-        bot.sendMessage(chatId, 'Une erreur est survenue lors de la recherche de la chanson.');
+        bot.sendMessage(chatId, 'Une erreur est survenue lors de la recherche de la chanson.🚫');
       }
       break;
     case 'url':
@@ -163,7 +167,7 @@ bot.onText(new RegExp(`\\${config.prefix}(start|help|gpt|list|alive|ping|repo|up
       switch (antiLinkAction) {
         case 'delete':
           bot.deleteMessage(chatId, userId);
-          bot.sendMessage(chatId, 'Message supprimé.');
+          bot.sendMessage(chatId, 'Message supprimé.🔰✅');
           break;
         case 'warn':
           bot.sendMessage(chatId, `Utilisateur averti: ${userId}`);
