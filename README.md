@@ -1,12 +1,12 @@
-# FAMOUS-TG🇭🇹
-Famous TG🔰✅ bot telegram   Premier bot telegram HAÏTIEN🇭🇹✅
+# FAMOUS-TG V2
+## Famous TG🔰✅ bot telegram ;100% HAÏTIEN🇭🇹✅
 # Fonctionnalités 
 #### Gestion de groupe
 #### Création de stickers
 #### CHATGPT
 #### Capacité à chercher des images pixabay
 #### Capacité à chercher et télécharger des chansons 
-#### et bien plus encore
+#### Calculatrice intégré 
 ##### Note : le bot est encore en développement certaines commandes peuvent ne pas fonctionner 
 
 
@@ -21,11 +21,11 @@ Famous TG🔰✅ bot telegram   Premier bot telegram HAÏTIEN🇭🇹✅
 
 5.  et Ajoutez les variables d'environnement sur Heroku
    
-   TELEGRAM_BOT_TOKEN=votre_token_de_bot_telegram
+   `TELEGRAM_BOT_TOKEN=votre_token_de_bot_telegram`
    
-   OPENAI_API_KEY=votre_cle_api_openai
+   `OPENAI_API_KEY=votre_cle_api_openai`
    
-   PREFIX=.
+   `PREFIX=.`
    
 
 6. Cliquez sur [Deploy on Heroku]() pour déployer votre application.
