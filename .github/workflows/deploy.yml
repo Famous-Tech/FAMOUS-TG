@@ -1,0 +1,34 @@
+name: Deploy Bot
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Start bot
+      run: |
+        npm install pm2 -g
+        pm2 start bot.js --name "famous-tg"
+        pm2 save
+      env:
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        API_KEY_OPENAI: ${{ secrets.API_KEY_OPENAI }}
+        PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+        GIT_REPO_URL: ${{ secrets.GIT_REPO_URL }}
+        OWNER_WHATSAPP_NUMBER: ${{ secrets.OWNER_WHATSAPP_NUMBER }}
