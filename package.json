@@ -1,7 +1,7 @@
 {
   "name": "famous-tg",
   "version": "1.0.0",
-  "description": "Bot telegram en Français développépar FAMOUS-TECH",
+  "description": "Bot telegram en Français développé par FAMOUS-TECH",
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js"
@@ -14,7 +14,9 @@
     "openai": "^2.0.5",
     "sharp": "^0.28.3",
     "ytdl-core": "^4.9.1",
-    "yt-search": "^2.10.2",    
+    "yt-search": "^2.10.2",
+    "@supabase/supabase-js": "^1.35.7",
+    "dotenv": "^10.0.0"
   },
   "author": "Famous-Tech",
   "license": "ISC"
