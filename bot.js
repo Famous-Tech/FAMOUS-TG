@@ -1,21 +1,31 @@
 const TelegramBot = require('node-telegram-bot-api');
-const config = require('./config');
+const express = require('express');
+const dotenv = require('dotenv');
 const { start, help, gpt, alive, ping, repo, uptime } = require('./menu/function');
 const { calc } = require('./tools/tools');
 const { imageSearch, songSearch, videoSearch } = require('./search/search');
 const commands = require('./menu/command');
-const express = require('express');
-const app = express();
+const { createClient } = require('@supabase/supabase-js');
 
-const bot = new TelegramBot(config.telegramBotToken, { polling: true });
+// Charger les variables d'environnement depuis le fichier .env
+dotenv.config();
+
+const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
 let startTime = Date.now();
+
+// Configuration de Supabase
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+const app = express();
 
 const logCommand = (username, command, query = '') => {
   const timestamp = new Date().toISOString();
   console.log(`[${timestamp}] ${username} a utilisé la commande ${command}${query ? ` avec la query: ${query}` : ''}`);
 };
 
-bot.onText(new RegExp(`\\${config.prefix}(start|help|gpt|alive|ping|repo|uptime|calc|img|song|video)`), async (msg, match) => {
+bot.onText(new RegExp(`\\${process.env.PREFIX}(start|help|gpt|alive|ping|repo|uptime|calc|img|song|video)`), async (msg, match) => {
   const chatId = msg.chat.id;
   const username = msg.from.username || msg.from.first_name;
   const command = match[1];
@@ -74,5 +84,7 @@ app.get('/', (req, res) => {
   res.send('FAMOUS TG Bot is running.');
 });
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`FAMOUS-TG activé sur le port : ${PORT}`);
 });
+
+module.exports = { bot, supabase }; // Exporter bot et supabase pour les utiliser dans warn.js
