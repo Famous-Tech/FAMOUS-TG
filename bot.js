@@ -10,13 +10,13 @@ const { createClient } = require('@supabase/supabase-js');
 // Charger les variables d'environnement depuis le fichier .env
 dotenv.config();
 
-const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
+const config = require('./config');
+
+const bot = new TelegramBot(config.telegramBotToken, { polling: true });
 let startTime = Date.now();
 
 // Configuration de Supabase
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 const app = express();
 
@@ -25,7 +25,7 @@ const logCommand = (username, command, query = '') => {
   console.log(`[${timestamp}] ${username} a utilisé la commande ${command}${query ? ` avec la query: ${query}` : ''}`);
 };
 
-bot.onText(new RegExp(`\\${process.env.PREFIX}(start|help|gpt|alive|ping|repo|uptime|calc|img|song|video)`), async (msg, match) => {
+bot.onText(new RegExp(`\\${config.prefix}(start|help|gpt|alive|ping|repo|uptime|calc|img|song|video)`), async (msg, match) => {
   const chatId = msg.chat.id;
   const username = msg.from.username || msg.from.first_name;
   const command = match[1];
